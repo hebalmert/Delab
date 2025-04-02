@@ -1,4 +1,5 @@
 ﻿using Delab.AccessData.Data;
+using Delab.Helpers;
 using Delab.Shared.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -7,39 +8,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Delab.Backend.Controllers;
 
-[Route("api/states")]
+[Route("api/corporations")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
 [ApiController]
-public class StatesController : ControllerBase
+public class CorporationsController : ControllerBase
 {
     private readonly DataContext _context;
+    private readonly IFileStorage _fileStorage;
+    private readonly string ImgRoute;
 
-    public StatesController(DataContext context)
+    public CorporationsController(DataContext context, IFileStorage fileStorage)
     {
         _context = context;
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<State>>> GetListAsync()
-    {
-        try
-        {
-            var listItem = await _context.States.OrderBy(x => x.Name).ToListAsync();
-            return Ok(listItem);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        _fileStorage = fileStorage;
+        //TODO: Cambio de ruta para Imagenes
+        ImgRoute = "wwwroot\\Images\\ImgCorporation";
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<State>> GetAsync(int id)
+    public async Task<ActionResult<Corporation>> GetOneAsync(int id)
     {
         try
         {
-            var ItemModel = await _context.States.FindAsync(id);
-            return Ok(ItemModel);
+            var modelo = await _context.Corporations.FindAsync(id);
+            if (modelo == null)
+            {
+                return BadRequest("Problemas para conseguir el registro");
+            }
+            return Ok(modelo);
         }
         catch (Exception ex)
         {
@@ -47,13 +43,28 @@ public class StatesController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> PostAsync([FromBody] State modelo)
+    [HttpPut]
+    public async Task<ActionResult> PutAsync(Corporation modelo)
     {
         try
         {
-            _context.States.Add(modelo);
+            if (!string.IsNullOrEmpty(modelo.ImgBase64))
+            {
+                string guid;
+                if (modelo.Imagen == null)
+                {
+                    guid = Guid.NewGuid().ToString() + ".jpg";
+                }
+                else
+                {
+                    guid = modelo.Imagen;
+                }
+                var imageId = Convert.FromBase64String(modelo.ImgBase64);
+                modelo.Imagen = await _fileStorage.UploadImage(imageId, ImgRoute, guid);
+            }
+            _context.Corporations.Update(modelo);
             await _context.SaveChangesAsync();
+
             return Ok();
         }
         catch (DbUpdateException dbEx)
@@ -73,19 +84,21 @@ public class StatesController : ControllerBase
         }
     }
 
-    [HttpPut]
-    public async Task<ActionResult<State>> PutAsync(State modelo)
+    [HttpPost]
+    public async Task<ActionResult<Corporation>> PostAsync(Corporation modelo)
     {
         try
         {
-            var UpdateModel = await _context.States.FirstOrDefaultAsync(x => x.StateId == modelo.StateId);
-            UpdateModel!.Name = modelo.Name;
-            UpdateModel.CountryId = modelo.CountryId;
-
-            _context.States.Update(UpdateModel);
+            if (!string.IsNullOrEmpty(modelo.ImgBase64))
+            {
+                string guid = Guid.NewGuid().ToString() + ".jpg";
+                var imageId = Convert.FromBase64String(modelo.ImgBase64);
+                modelo.Imagen = await _fileStorage.UploadImage(imageId, ImgRoute, guid);
+            }
+            _context.Corporations.Add(modelo);
             await _context.SaveChangesAsync();
 
-            return Ok(UpdateModel);
+            return Ok(modelo);
         }
         catch (DbUpdateException dbEx)
         {
@@ -109,13 +122,23 @@ public class StatesController : ControllerBase
     {
         try
         {
-            var DataRemove = await _context.States.FindAsync(id);
+            var DataRemove = await _context.Corporations.FindAsync(id);
             if (DataRemove == null)
             {
-                return BadRequest("No se Encontro el registro para Borrar");
+                return BadRequest("Problemas para conseguir el registro");
             }
-            _context.States.Remove(DataRemove);
+            _context.Corporations.Remove(DataRemove);
             await _context.SaveChangesAsync();
+
+            if (DataRemove.Imagen is not null)
+            {
+                var response = _fileStorage.DeleteImage(ImgRoute, DataRemove.Imagen);
+                if (!response)
+                {
+                    return BadRequest("Se Elimino el Registro pero sin la Imagen");
+                }
+            }
+
             return Ok();
         }
         catch (DbUpdateException dbEx)

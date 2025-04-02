@@ -18,4 +18,6 @@ public class Country
 
     //relaciones
     public ICollection<State>? States { get; set; }
+
+    public ICollection<Corporation>? Corporations { get; set; }
 }

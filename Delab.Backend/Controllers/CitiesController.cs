@@ -1,11 +1,14 @@
 ﻿using Delab.AccessData.Data;
 using Delab.Shared.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Delab.Backend.Controllers;
 
 [Route("api/cities")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
 [ApiController]
 public class CitiesController : ControllerBase
 {

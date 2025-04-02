@@ -7,40 +7,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Delab.Backend.Controllers;
 
-[Route("api/countries")]
+[Route("api/softplans")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
 [ApiController]
-public class CountriesController : ControllerBase
+public class SoftPlansController : ControllerBase
 {
     private readonly DataContext _context;
 
-    public CountriesController(DataContext context)
+    public SoftPlansController(DataContext context)
     {
         _context = context;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
-    {
-        try
-        {
-            var listCountry = await _context.Countries
-                .Include(X => X.States)!.ThenInclude(x => x.Cities).OrderBy(x => x.Name).ToListAsync();
-            return Ok(listCountry);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
     [HttpGet("{id}")]
-    public async Task<ActionResult<Country>> GetCountry(int id)
+    public async Task<ActionResult<SoftPlan>> GetOneAsync(int id)
     {
         try
         {
-            var CountryName = await _context.Countries.FindAsync(id);
-            return Ok(CountryName);
+            var modelo = await _context.SoftPlans.FindAsync(id);
+            if (modelo == null)
+            {
+                return BadRequest("Problemas para conseguir el registro");
+            }
+            return Ok(modelo);
         }
         catch (Exception ex)
         {
@@ -48,12 +37,12 @@ public class CountriesController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> PostCountry([FromBody] Country modelo)
+    [HttpPut]
+    public async Task<IActionResult> PutAsync(SoftPlan modelo)
     {
         try
         {
-            _context.Countries.Add(modelo);
+            _context.SoftPlans.Update(modelo);
             await _context.SaveChangesAsync();
             return Ok();
         }
@@ -74,19 +63,14 @@ public class CountriesController : ControllerBase
         }
     }
 
-    [HttpPut]
-    public async Task<ActionResult<Country>> PutCountry(Country modelo)
+    [HttpPost]
+    public async Task<ActionResult<SoftPlan>> PostAsync(SoftPlan modelo)
     {
         try
         {
-            var UpdateCountry = await _context.Countries.FirstOrDefaultAsync(x => x.CountryId == modelo.CountryId);
-            UpdateCountry!.Name = modelo.Name;
-            UpdateCountry.CodPhone = modelo.CodPhone;
-
-            _context.Countries.Update(UpdateCountry);
+            _context.SoftPlans.Add(modelo);
             await _context.SaveChangesAsync();
-
-            return Ok(UpdateCountry);
+            return Ok(modelo);
         }
         catch (DbUpdateException dbEx)
         {
@@ -106,16 +90,16 @@ public class CountriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCountry(int id)
+    public async Task<IActionResult> DeleteAAsync(int id)
     {
         try
         {
-            var DataRemove = await _context.Countries.FindAsync(id);
+            var DataRemove = await _context.SoftPlans.FindAsync(id);
             if (DataRemove == null)
             {
-                return BadRequest("No se Encontro el registro para Borrar");
+                return BadRequest("Problemas para conseguir el registro");
             }
-            _context.Countries.Remove(DataRemove);
+            _context.SoftPlans.Remove(DataRemove);
             await _context.SaveChangesAsync();
             return Ok();
         }

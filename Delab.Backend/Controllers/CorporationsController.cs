@@ -1,6 +1,8 @@
 ﻿using Delab.AccessData.Data;
+using Delab.Backend.helpers;
 using Delab.Helpers;
 using Delab.Shared.Entities;
+using Delab.Shared.Pagination;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +25,19 @@ public class CorporationsController : ControllerBase
         _fileStorage = fileStorage;
         //TODO: Cambio de ruta para Imagenes
         ImgRoute = "wwwroot\\Images\\ImgCorporation";
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Corporation>>> GetAsync([FromQuery] PaginationDTO pagination)
+    {
+        var queryable = _context.Corporations.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(pagination.Filter))
+        {
+            queryable = queryable.Where(x => x.Name!.ToLower().Contains(pagination.Filter.ToLower()));
+        }
+
+        await HttpContext.InsertParameterPagination(queryable, pagination.RecordsNumber);
+        return await queryable.OrderBy(x => x.Name).Paginate(pagination).ToListAsync();
     }
 
     [HttpGet("{id}")]

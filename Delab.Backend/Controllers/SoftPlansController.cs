@@ -1,5 +1,7 @@
 ﻿using Delab.AccessData.Data;
+using Delab.Backend.helpers;
 using Delab.Shared.Entities;
+using Delab.Shared.Pagination;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +19,19 @@ public class SoftPlansController : ControllerBase
     public SoftPlansController(DataContext context)
     {
         _context = context;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SoftPlan>>> GetAsync([FromQuery] PaginationDTO pagination)
+    {
+        var queryable = _context.SoftPlans.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(pagination.Filter))
+        {
+            queryable = queryable.Where(x => x.Name!.ToLower().Contains(pagination.Filter.ToLower()));
+        }
+
+        await HttpContext.InsertParameterPagination(queryable, pagination.RecordsNumber);
+        return await queryable.OrderBy(x => x.Name).Paginate(pagination).ToListAsync();
     }
 
     [HttpGet("{id}")]

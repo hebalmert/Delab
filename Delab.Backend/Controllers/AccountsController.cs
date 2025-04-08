@@ -3,6 +3,8 @@ using Delab.Helpers;
 using Delab.Shared.Entities;
 using Delab.Shared.Enum;
 using Delab.Shared.ResponsesSec;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -28,7 +30,7 @@ public class AccountsController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpPost]
+    [HttpPost("Login")]
     public async Task<ActionResult> Login([FromBody] LoginDTO modelo)
     {
         //TODO: Cambio de Path para Imagenes
@@ -92,6 +94,29 @@ public class AccountsController : ControllerBase
         return BadRequest("Usuario o Clave Erroneos");
     }
 
+    [HttpPost("changePassword")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDTO model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        var user = await _userHelper.GetUserAsync(User.Identity!.Name!);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var result = await _userHelper.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors.FirstOrDefault()!.Description);
+        }
+
+        return NoContent();
+    }
+
     private TokenDTO BuildToken(User user, string imgUsuario)
     {
         string NomCompa;
@@ -127,7 +152,7 @@ public class AccountsController : ControllerBase
         }
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["jwtKey"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiration = DateTime.UtcNow.AddDays(3);
+        var expiration = DateTime.UtcNow.AddMinutes(3);
         var token = new JwtSecurityToken(
             issuer: null,
             audience: null,

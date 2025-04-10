@@ -1,0 +1,16 @@
+﻿@page "/softplans/create"
+
+@if(_softplan is null)
+{
+    <Loading/>
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormSoftPlan SoftPlan="_softplan"
+                      OnSubmit="Create" 
+                ReturnAction="Return"/>
+        </DialogContent>
+    </MudDialog>
+}

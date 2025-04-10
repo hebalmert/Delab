@@ -11,13 +11,14 @@
                         <div class="col-md-3 d-flex justify-content-start">
                             <MudButton Variant="Variant.Filled"
                                        EndIcon="@Icons.Material.Filled.AddCircle"
-                                       Color="Color.Dark" style="width:130px">
+                                       Color="Color.Dark" style="width:130px"
+                                       OnClick="@(()=> ShowModalAsync())">
                                 Plan
                             </MudButton>
                         </div>
                         <!-- Columna para el filtro -->
                         <div class="col-md-9 d-flex justify-content-end">
-                            <FilterComponent ApplyFilter="SetFilterValue"/>
+                            <FilterComponent ApplyFilter="SetFilterValue" />
                         </div>
 
                     </div>
@@ -58,18 +59,18 @@
                                                     <MudCheckBox @bind-Value="@item.Active" ReadOnly="true"></MudCheckBox>
                                                 </td>
                                                 <td style="width:1px; padding-left:1px; padding-right:4px;">
-                                                    @* <MudFab Size="Size.Small" *@
-                                                    @*         EndIcon="@Icons.Material.Filled.Edit" *@
-                                                    @*         Color="Color.Dark" *@
-                                                    @*         OnClick="@(()=> ShowModalAsync(item.SoftPlanId, true))"> *@
-                                                    @* </MudFab> *@
+                                                    <MudFab Size="Size.Small"
+                                                            EndIcon="@Icons.Material.Filled.Edit"
+                                                            Color="Color.Dark"
+                                                            OnClick="@(()=> ShowModalAsync(item.SoftPlanId, true))">
+                                                    </MudFab>
                                                 </td>
                                                 <td style="width:1px; padding-left:1px; padding-right:4px;">
-                                                    @* <MudFab Size="Size.Small" *@
-                                                    @*         EndIcon="@Icons.Material.Filled.Delete" *@
-                                                    @*         Color="Color.Error" *@
-                                                    @*         OnClick="@(()=> DeleteAsync(item.SoftPlanId))"> *@
-                                                    @* </MudFab> *@
+                                                    <MudFab Size="Size.Small"
+                                                            EndIcon="@Icons.Material.Filled.Delete"
+                                                            Color="Color.Error"
+                                                            OnClick="@(()=> DeleteAsync(item.SoftPlanId))">
+                                                    </MudFab>
                                                 </td>
                                             </tr>
                                         }

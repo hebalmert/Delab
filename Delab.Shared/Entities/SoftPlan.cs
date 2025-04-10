@@ -10,7 +10,7 @@ public class SoftPlan
 
     [MaxLength(50, ErrorMessage = "El Maximo de caracteres es {0}")]
     [Required(ErrorMessage = "El campo {0} es Requerido")]
-    [Display(Name = "Plan HebertM")]
+    [Display(Name = "Plan Comercial")]
     public string? Name { get; set; }
 
     [DisplayFormat(DataFormatString = "{0:C2}")]

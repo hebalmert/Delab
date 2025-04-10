@@ -4,6 +4,7 @@ using Delab.Front.AuthenticationProviders;
 using Delab.Front.Helpers;
 using Delab.Shared.Entities;
 using Microsoft.AspNetCore.Components;
+using Microsoft.VisualBasic;
 using MudBlazor;
 using System.Runtime.CompilerServices;
 
@@ -43,6 +44,30 @@ public partial class IndexSoftPlan
         await Cargar();
     }
 
+    private async Task ShowModalAsync(int id = 0, bool isEdit = false)
+    {
+        var options = new DialogOptions() { CloseOnEscapeKey = true, CloseButton = true };
+        IDialogReference? dialog;
+        if (isEdit)
+        {
+            var parameters = new DialogParameters
+            {
+                { "Id", id }
+            };
+            dialog = await _dialogService.ShowAsync<EditSoftPlan>($"Editar Plan", parameters, options);
+        }
+        else
+        {
+            dialog = await _dialogService.ShowAsync<CreateSoftPlan>($"Nuevo Plan", options);
+        }
+
+        var result = await dialog.Result;
+        if (result!.Canceled)
+        {
+            await Cargar();
+        }
+    }
+
     private async Task Cargar(int page = 1)
     {
         //Implementamos Interpolacion $" ";
@@ -63,5 +88,30 @@ public partial class IndexSoftPlan
         SoftPlans = responseHttp.Response;
 
         TotalPages = int.Parse(responseHttp.HttpResponseMessage.Headers.GetValues("Totalpages").FirstOrDefault()!);
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await _sweetAlert.FireAsync(new SweetAlertOptions
+        {
+            Title = "Confirmacion",
+            Text = "Estas Seguro de Borrar el Registro",
+            Icon = SweetAlertIcon.Question,
+            ShowCancelButton = true
+        });
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await _repository.DeleteAsync($"{baseUrl}/{id}");
+        var errorHandler = await _responseHandler.HandleErrorAsync(responseHttp);
+        if (errorHandler)
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+        await Cargar();
     }
 }

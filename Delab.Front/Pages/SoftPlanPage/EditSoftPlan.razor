@@ -1,0 +1,17 @@
+﻿@page "/softplans/edit/{Id:int}"
+
+@if (_softplan is null)
+{
+    <Loading />
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormSoftPlan SoftPlan="_softplan"
+                          OnSubmit="Edit"
+                          ReturnAction="Return" />
+        </DialogContent>
+    </MudDialog>
+}
+

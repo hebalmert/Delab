@@ -19,6 +19,13 @@ public class CountriesController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("loadCombo")]
+    public async Task<ActionResult<List<Country>>> GetSoftplanCombo()
+    {
+        var newList = await _context.Countries.OrderBy(x => x.Name).ToListAsync();
+        return newList;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
     {

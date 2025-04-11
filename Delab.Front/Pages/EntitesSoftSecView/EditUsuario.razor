@@ -1,0 +1,18 @@
+﻿@page "/usuarios/edit/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@if (Usuario is null)
+{
+    <Loading />
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormUsuario Usuario="Usuario"
+                             IsEditControl="true"
+                             OnSubmit="Edit"
+                             ReturnAction="Return" />
+        </DialogContent>
+    </MudDialog>
+}

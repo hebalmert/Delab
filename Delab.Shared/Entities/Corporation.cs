@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Delab.Shared.EntitesSoftSec;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Delab.Shared.Entities;
@@ -70,4 +71,8 @@ public class Corporation
     public Country? Country { get; set; }
 
     public ICollection<Manager>? Managers { get; set; }
+
+    public ICollection<Usuario>? Usuarios { get; set; }
+
+    public ICollection<UsuarioRole>? UsuarioRoles { get; set; }
 }

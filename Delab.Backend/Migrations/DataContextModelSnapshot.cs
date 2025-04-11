@@ -22,6 +22,103 @@ namespace Delab.Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Delab.Shared.EntitesSoftSec.Usuario", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("CorporationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Job")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Nro_Document")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("UsuarioId");
+
+                    b.HasIndex("CorporationId");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.HasIndex("FullName", "Nro_Document", "CorporationId")
+                        .IsUnique()
+                        .HasFilter("[FullName] IS NOT NULL");
+
+                    b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("Delab.Shared.EntitesSoftSec.UsuarioRole", b =>
+                {
+                    b.Property<int>("UsuarioRoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioRoleId"));
+
+                    b.Property<int>("CorporationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UsuarioRoleId");
+
+                    b.HasIndex("CorporationId");
+
+                    b.HasIndex("UsuarioId", "UserType")
+                        .IsUnique();
+
+                    b.ToTable("UsuarioRoles");
+                });
+
             modelBuilder.Entity("Delab.Shared.Entities.City", b =>
                 {
                     b.Property<int>("CityId")
@@ -526,6 +623,36 @@ namespace Delab.Backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Delab.Shared.EntitesSoftSec.Usuario", b =>
+                {
+                    b.HasOne("Delab.Shared.Entities.Corporation", "Corporation")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("CorporationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Corporation");
+                });
+
+            modelBuilder.Entity("Delab.Shared.EntitesSoftSec.UsuarioRole", b =>
+                {
+                    b.HasOne("Delab.Shared.Entities.Corporation", "Corporation")
+                        .WithMany("UsuarioRoles")
+                        .HasForeignKey("CorporationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Delab.Shared.EntitesSoftSec.Usuario", "Usuario")
+                        .WithMany("UsuarioRoles")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Corporation");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Delab.Shared.Entities.City", b =>
                 {
                     b.HasOne("Delab.Shared.Entities.State", "State")
@@ -648,9 +775,18 @@ namespace Delab.Backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Delab.Shared.EntitesSoftSec.Usuario", b =>
+                {
+                    b.Navigation("UsuarioRoles");
+                });
+
             modelBuilder.Entity("Delab.Shared.Entities.Corporation", b =>
                 {
                     b.Navigation("Managers");
+
+                    b.Navigation("UsuarioRoles");
+
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("Delab.Shared.Entities.Country", b =>

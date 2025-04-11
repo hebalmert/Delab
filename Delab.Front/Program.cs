@@ -36,7 +36,7 @@ builder.Services.AddScoped(sp =>
         async () =>
         {
             var token = await jsRuntime.GetLocalStorage("TOKEN_KEY");
-            return token as string; // Asegurarse de que el token es un string
+            return Convert.ToString(token); // Asegurarse de que el token es un string
         }
     );
 });

@@ -21,6 +21,13 @@ public class SoftPlansController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("loadCombo")]
+    public async Task<ActionResult<List<SoftPlan>>> GetSoftplanCombo()
+    {
+        var newList = await _context.SoftPlans.Where(x => x.Active).OrderBy(x => x.Name).ToListAsync();
+        return newList;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SoftPlan>>> GetAsync([FromQuery] PaginationDTO pagination)
     {

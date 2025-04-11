@@ -1,0 +1,18 @@
+﻿@page "/corporations/create"
+@attribute [Authorize(Roles = "Admin")]
+
+@if (_Corporation is null)
+{
+    <Loading />
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormCorporation Corporation="_Corporation"
+                             IsEditControl="false"
+                             OnSubmit="Create"
+                             ReturnAction="Return" />
+        </DialogContent>
+    </MudDialog>
+}

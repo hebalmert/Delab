@@ -9,6 +9,20 @@
             </MudNavGroup>
         </Authorized>
     </AuthorizeView>
+    <AuthorizeView Roles="Cajero">
+        <Authorized>
+            <MudNavGroup Title="Menu para Cajeros" Icon="@Icons.Material.Filled.Settings" IconColor="Color.Surface" Expanded="false">
+                <MudNavLink Href="/usuarios" Icon="@Icons.Material.Filled.Security" IconColor="Color.Info">Usuarios</MudNavLink>
+            </MudNavGroup>
+        </Authorized>
+    </AuthorizeView>
+    <AuthorizeView Roles="Usuario">
+        <Authorized>
+            <MudNavGroup Title="Seguridad Usuario" Icon="@Icons.Material.Filled.Settings" IconColor="Color.Surface" Expanded="false">
+                <MudNavLink Href="/usuarios" Icon="@Icons.Material.Filled.Security" IconColor="Color.Info">Usuarios</MudNavLink>
+            </MudNavGroup>
+        </Authorized>
+    </AuthorizeView>
 </MudNavMenu>
 
 

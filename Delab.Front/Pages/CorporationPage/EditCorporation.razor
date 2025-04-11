@@ -1,0 +1,19 @@
+﻿@page "/corporations/edit/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@if (_Corporation is null)
+{
+    <Loading />
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormCorporation Corporation="_Corporation"
+                             IsEditControl="true"
+                             OnSubmit="Edit"
+                             ReturnAction="Return" />
+        </DialogContent>
+    </MudDialog>
+}
+

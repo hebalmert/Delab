@@ -1,0 +1,17 @@
+﻿@page "/usuariosRole/createUsuarioRole/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@if (UsuarioRole is null)
+{
+    <Loading />
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <FormUsuarioRole UsuarioRole="UsuarioRole"
+                             OnSubmit="Create"
+                             ReturnAction="Return" />
+        </DialogContent>
+    </MudDialog>
+}

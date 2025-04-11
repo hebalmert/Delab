@@ -1,4 +1,5 @@
-﻿using Delab.Shared.Entities;
+﻿using Delab.Shared.EntitesSoftSec;
+using Delab.Shared.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -23,6 +24,11 @@ public class DataContext : IdentityDbContext<User>
     public DbSet<SoftPlan> SoftPlans => Set<SoftPlan>();
     public DbSet<Corporation> Corporations => Set<Corporation>();
     public DbSet<Manager> Managers => Set<Manager>();
+
+    //EntitiesSoftSec
+
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<UsuarioRole> UsuarioRoles => Set<UsuarioRole>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

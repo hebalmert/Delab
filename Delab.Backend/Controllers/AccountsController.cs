@@ -2,6 +2,7 @@
 using Delab.Helpers;
 using Delab.Shared.Entities;
 using Delab.Shared.Enum;
+using Delab.Shared.Responses;
 using Delab.Shared.ResponsesSec;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -21,13 +22,15 @@ public class AccountsController : ControllerBase
     private readonly DataContext _context;
     private readonly IUserHelper _userHelper;
     private readonly IConfiguration _configuration;
+    private readonly IEmailHelper _emailHelper;
 
     public AccountsController(DataContext context, IUserHelper userHelper,
-        IConfiguration configuration)
+        IConfiguration configuration, IEmailHelper emailHelper)
     {
         _context = context;
         _userHelper = userHelper;
         _configuration = configuration;
+        _emailHelper = emailHelper;
     }
 
     [HttpPost("Login")]
@@ -94,6 +97,42 @@ public class AccountsController : ControllerBase
         return BadRequest("Usuario o Clave Erroneos");
     }
 
+    [HttpPost("RecoverPassword")]
+    public async Task<IActionResult> RecoverPasswordAsync([FromBody] EmailDTO model)
+    {
+        var user = await _userHelper.GetUserAsync(model.Email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        Response response = await SendRecoverEmailAsync(user);
+        if (response.IsSuccess)
+        {
+            return NoContent();
+        }
+
+        return BadRequest(response.Message);
+    }
+
+    [HttpPost("ResetPassword")]
+    public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordDTO model)
+    {
+        var user = await _userHelper.GetUserAsync(model.Email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var result = await _userHelper.ResetPasswordAsync(user, model.Token, model.NewPassword);
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
+
+        return BadRequest(result.Errors.FirstOrDefault()!.Description);
+    }
+
     [HttpPost("changePassword")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDTO model)
@@ -115,6 +154,49 @@ public class AccountsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpGet("ConfirmEmail")]
+    public async Task<IActionResult> ConfirmEmailAsync(string userId, string token)
+    {
+        token = token.Replace(" ", "+");
+        var user = await _userHelper.GetUserAsync(new Guid(userId));
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var result = await _userHelper.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors.FirstOrDefault());
+        }
+
+        return NoContent();
+    }
+
+    private async Task<Response> SendRecoverEmailAsync(User user)
+    {
+        var myToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+        var tokenLink = Url.Action("ResetPassword", "accounts", new
+        {
+            userid = user.Id,
+            token = myToken
+        }, HttpContext.Request.Scheme, _configuration["UrlFrontend"]);
+
+        string subject = "Recuperacion de Clave";
+        string body = ($"De: NexxtPlanet" +
+            $"<h1>Para Recuperar su Clave</h1>" +
+            $"<p>" +
+            $"Para Crear una clave nueva " +
+            $"Has Click en el siguiente Link:</br></br><strong><a href = \"{tokenLink}\">Cambiar Clave</a></strong>");
+
+        Response response = await _emailHelper.ConfirmarCuenta(user.UserName!, user.FullName!, subject, body);
+        if (response.IsSuccess == false)
+        {
+            return response;
+        }
+        return response;
     }
 
     private TokenDTO BuildToken(User user, string imgUsuario)

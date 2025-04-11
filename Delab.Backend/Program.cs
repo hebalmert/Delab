@@ -6,6 +6,7 @@ using Delab.Shared.ResponsesSec;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -91,6 +92,7 @@ builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("S
 
 builder.Services.AddTransient<SeedDb>();
 builder.Services.AddScoped<IUserHelper, UserHelper>();
+builder.Services.AddScoped<IEmailHelper, EmailHelper>();
 builder.Services.AddScoped<IUtilityTools, UtilityTools>();
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 
@@ -132,6 +134,16 @@ if (app.Environment.IsDevelopment())
 }
 //Llamar el Servicio de CORS
 app.UseCors("AllowSpecificOrigin");
+
+// Configuración para servir archivos estáticos desde la carpeta Images
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider
+    (
+        Path.Combine(builder.Environment.WebRootPath, "Images")
+    ),
+    RequestPath = "/Images"
+});
 
 app.UseHttpsRedirection();
 

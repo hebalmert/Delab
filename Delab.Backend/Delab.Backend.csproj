@@ -35,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Images\ImgCorporation\" />
     <Folder Include="wwwroot\Images\ImgManager\" />
     <Folder Include="wwwroot\Images\ImgUsuarios\" />
   </ItemGroup>

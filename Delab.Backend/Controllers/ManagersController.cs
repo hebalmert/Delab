@@ -39,7 +39,8 @@ public class ManagersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Manager>>> GetAsync([FromQuery] PaginationDTO pagination)
     {
-        var queryable = _context.Managers.AsQueryable();
+        var queryable = _context.Managers.Include(x => x.Corporation).AsQueryable();
+
         if (!string.IsNullOrWhiteSpace(pagination.Filter))
         {
             queryable = queryable.Where(x => x.FullName!.ToLower().Contains(pagination.Filter.ToLower()));
@@ -109,9 +110,9 @@ public class ManagersController : ControllerBase
                     guid = modelo.Photo;
                 }
                 var imageId = Convert.FromBase64String(modelo.ImgBase64);
-                modelo.Photo = await _fileStorage.UploadImage(imageId, ImgRoute, guid);
+                NewModelo.Photo = await _fileStorage.UploadImage(imageId, ImgRoute, guid);
             }
-            _context.Managers.Update(modelo);
+            _context.Managers.Update(NewModelo);
             await _context.SaveChangesAsync();
 
             User UserCurrent = await _userHelper.GetUserAsync(modelo.UserName);

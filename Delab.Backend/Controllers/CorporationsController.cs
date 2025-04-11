@@ -27,10 +27,17 @@ public class CorporationsController : ControllerBase
         ImgRoute = "wwwroot\\Images\\ImgCorporation";
     }
 
+    [HttpGet("loadCombo")]
+    public async Task<ActionResult<List<Corporation>>> GetSoftplanCombo()
+    {
+        var newList = await _context.Corporations.Where(x => x.Active).OrderBy(x => x.Name).ToListAsync();
+        return newList;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Corporation>>> GetAsync([FromQuery] PaginationDTO pagination)
     {
-        var queryable = _context.Corporations.AsQueryable();
+        var queryable = _context.Corporations.Include(x => x.SoftPlan).AsQueryable();
         if (!string.IsNullOrWhiteSpace(pagination.Filter))
         {
             queryable = queryable.Where(x => x.Name!.ToLower().Contains(pagination.Filter.ToLower()));

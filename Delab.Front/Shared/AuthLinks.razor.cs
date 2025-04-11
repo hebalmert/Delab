@@ -48,6 +48,12 @@ public partial class AuthLinks
         await _dialogService.ShowAsync<Logout>("Abandonar Sesion", closeOnEscapeKey);
     }
 
+    private async Task ShowModalRecoverPassword()
+    {
+        var closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge };
+        await _dialogService.ShowAsync<RecoverPassword>("Recuperar su Clave", closeOnEscapeKey);
+    }
+
     private async Task ShowModalCambiarClave()
     {
         var closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge };
